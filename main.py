@@ -25,6 +25,28 @@ class NaorisProtocol:
         self.proxy_index = 0
         self.account_proxies = {}
 
+    # Make sure print_question is inside the class indentation
+    def print_question(self):
+        while True:
+            try:
+                print("1. Run With Monosans Proxy")
+                print("2. Run With Private Proxy")
+                print("3. Run Without Proxy")
+                choose = int(input("Choose [1/2/3] -> ").strip())
+
+                if choose in [1, 2, 3]:
+                    proxy_type = (
+                        "Run With Monosans Proxy" if choose == 1 else 
+                        "Run With Private Proxy" if choose == 2 else 
+                        "Run Without Proxy"
+                    )
+                    print(f"{Fore.GREEN + Style.BRIGHT}{proxy_type} Selected.{Style.RESET_ALL}")
+                    return choose
+                else:
+                    print(f"{Fore.RED + Style.BRIGHT}Please enter either 1, 2 or 3.{Style.RESET_ALL}")
+            except ValueError:
+                print(f"{Fore.RED + Style.BRIGHT}Invalid input. Enter a number (1, 2 or 3).{Style.RESET_ALL}")
+
     def log(self, message):
         print(f"{Fore.CYAN + Style.BRIGHT}[ {datetime.now().astimezone(wib).strftime('%x %X %Z')} ]{Style.RESET_ALL} {Fore.WHITE + Style.BRIGHT}| {Style.RESET_ALL}{message}", flush=True)
 
