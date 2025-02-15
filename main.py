@@ -1,4 +1,4 @@
-from curl_cffi import requests
+import requests
 from fake_useragent import FakeUserAgent
 from datetime import datetime
 from colorama import *
