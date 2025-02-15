@@ -4,8 +4,6 @@ from datetime import datetime
 from colorama import *
 import asyncio, time, json, os, pytz
 
-
-ip_address = os.getenv("IP_ADDRESS", "192.168.100.187")
 wib = pytz.timezone('Asia/Jakarta')
 whiteList = []
 
@@ -146,7 +144,7 @@ class NaorisProtocol:
             except ValueError:
                 print(f"{Fore.RED + Style.BRIGHT}Invalid input. Enter a number (1, 2 or 3).{Style.RESET_ALL}")
 
-    async def user_login(self, address: str, proxy=None, retries=500):
+    async def user_login(self, address: str, proxy=None, retries=5):
         url = "https://naorisprotocol.network/sec-api/auth/generateToken"
         data = json.dumps({"wallet_address":address})
         headers = {
@@ -156,7 +154,7 @@ class NaorisProtocol:
         }
         for attempt in range(retries):
             try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=6000, impersonate="safari15_5")
+                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="safari15_5")
                 if response.status_code == 401:
                     return self.print_message(self.mask_account(address), proxy, Fore.RED, f"GET Access Token Failed: {Fore.YELLOW+Style.BRIGHT}Blocked By Cloudflare")
                     
@@ -182,7 +180,7 @@ class NaorisProtocol:
         }
         for attempt in range(retries):
             try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=6000, impersonate="safari15_5")
+                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="safari15_5")
                 if response.status_code == 401:
                     token = await self.process_get_access_token(address, use_proxy)
                     headers["Authorization"] = f"Bearer {token}"
@@ -213,7 +211,7 @@ class NaorisProtocol:
         }
         for attempt in range(retries):
             try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=6000, impersonate="safari15_5")
+                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="safari15_5")
                 if response.status_code == 401:
                     token = await self.process_get_access_token(address, use_proxy)
                     headers["Authorization"] = f"Bearer {token}"
@@ -230,7 +228,7 @@ class NaorisProtocol:
                 
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
-    async def toggle_activated(self, address: str, device_hash: int, proxy=None, retries=500):
+    async def toggle_activated(self, address: str, device_hash: int, proxy=None, retries=5):
         url = "https://naorisprotocol.network/sec-api/api/toggle"
         data = json.dumps({"walletAddress":address, "state":"ON", "deviceHash":device_hash})
         headers = {
@@ -240,7 +238,7 @@ class NaorisProtocol:
         }
         for attempt in range(retries):
             try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=6000, impersonate="safari15_5")
+                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="safari15_5")
                 response.raise_for_status()
                 result = response.text
                 if result.strip() in ["Session started", "No action needed"]:
@@ -253,7 +251,7 @@ class NaorisProtocol:
         
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Turn On Protection Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
-    async def send_heartbeats(self, address: str, device_hash: int, token: str, use_proxy: bool, proxy=None, retries=500):
+    async def send_heartbeats(self, address: str, device_hash: int, token: str, use_proxy: bool, proxy=None, retries=5):
         url = "https://naorisprotocol.network/sec-api/api/produce-to-kafka"
         data = json.dumps({"topic":"device-heartbeat", "inputData":{"walletAddress":address, "deviceHash":device_hash}})
         headers = {
@@ -264,7 +262,7 @@ class NaorisProtocol:
         }
         for attempt in range(retries):
             try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=6000, impersonate="safari15_5")
+                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="safari15_5")
                 if response.status_code == 401:
                     token = await self.process_get_access_token(address, use_proxy)
                     headers["Authorization"] = f"Bearer {token}"
@@ -416,5 +414,5 @@ if __name__ == "__main__":
         print(
             f"{Fore.CYAN + Style.BRIGHT}[ {datetime.now().astimezone(wib).strftime('%x %X %Z')} ]{Style.RESET_ALL}"
             f"{Fore.WHITE + Style.BRIGHT} | {Style.RESET_ALL}"
-            f"{Fore.RED + Style.BRIGHT}[ EXIT ] Naoris Protocol Node - BOT on IP 192.168.100.187{Style.RESET_ALL}                                       "                              
+            f"{Fore.RED + Style.BRIGHT}[ EXIT ] Naoris Protocol Node - BOT{Style.RESET_ALL}                                       "                              
         )
