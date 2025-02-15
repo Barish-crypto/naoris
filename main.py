@@ -24,6 +24,7 @@ class NaorisProtocol:
         self.proxies = []
         self.proxy_index = 0
         self.account_proxies = {}
+        self.clear_terminal()  # Correct method call from inside the class
 
     # Make sure print_question is inside the class indentation
     def print_question(self):
@@ -112,6 +113,10 @@ class NaorisProtocol:
             f"{Fore.MAGENTA + Style.BRIGHT}-{Style.RESET_ALL} {Fore.CYAN + Style.BRIGHT}Trạng thái:{Style.RESET_ALL}{color + Style.BRIGHT} {message} {Style.RESET_ALL}{Fore.CYAN + Style.BRIGHT}] {Style.RESET_ALL}"
         )
 
+    def clear_terminal(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+
     async def process_user_login(self, address: str, proxy=None, retries=5):
         url = "https://naorisprotocol.network/sec-api/auth/generateToken"
         data = json.dumps({"wallet_address": address})
@@ -185,33 +190,51 @@ class NaorisProtocol:
         try:
             accounts = self.load_accounts()
             if not accounts:
-                self.log(f"{Fore.RED}Không có tài khoản nào được tải.{Style.RESET_ALL}")
+                self.log(f"{Fore.RED}No Accounts Loaded.{Style.RESET_ALL}")
                 return
 
             use_proxy_choice = self.print_question()
 
-            use_proxy = use_proxy_choice in [1, 2]
+            use_proxy = False
+            if use_proxy_choice in [1, 2]:
+                use_proxy = True
 
-            self.clear_terminal()
+            self.clear_terminal()  # Correctly calling the method
             self.welcome()
-            self.log(f"{Fore.GREEN + Style.BRIGHT}Số lượng tài khoản: {Style.RESET_ALL}{len(accounts)}")
+            self.log(
+                f"{Fore.GREEN + Style.BRIGHT}Account's Total: {Style.RESET_ALL}"
+                f"{Fore.WHITE + Style.BRIGHT}{len(accounts)}{Style.RESET_ALL}"
+            )
 
             if use_proxy:
                 await self.load_proxies(use_proxy_choice)
+            self.log(f"{Fore.CYAN + Style.BRIGHT}={Style.RESET_ALL}"*65)
 
             while True:
-                tasks = [asyncio.create_task(self.process_accounts(account['walletAddress'], device_hash, use_proxy)) 
-                         for account in accounts for device_hash in account['deviceHash']]
+                tasks = []
+                for account in accounts:
+                    address = account['walletAddress']
+                    device_hashs = account['deviceHash']
+
+                    if address and device_hashs:
+                        for device_hash in device_hashs:
+                            tasks.append(asyncio.create_task(self.process_accounts(address, device_hash, use_proxy)))
+
                 await asyncio.gather(*tasks)
                 await asyncio.sleep(10)
 
+        except FileNotFoundError:
+            self.log(f"{Fore.RED}File 'accounts.txt' Not Found.{Style.RESET_ALL}")
+            return
         except Exception as e:
-            self.log(f"{Fore.RED + Style.BRIGHT}Lỗi: {e}{Style.RESET_ALL}")
+            self.log(f"{Fore.RED+Style.BRIGHT}Error: {e}{Style.RESET_ALL}")
+
 
 
 if __name__ == "__main__":
     try:
         bot = NaorisProtocol()
+        use_proxy_choice = bot.print_question()  # Call method on the instance
         asyncio.run(bot.main())
     except KeyboardInterrupt:
-        print(f"{Fore.CYAN + Style.BRIGHT}[ {datetime.now().astimezone(wib).strftime('%x %X %Z')} ]{Style.RESET_ALL} {Fore.WHITE + Style.BRIGHT}| {Style.RESET_ALL}{Fore.RED + Style.BRIGHT}[ EXIT ]{Style.RESET_ALL} Naoris Protocol Node - BOT")
+        print(f"{Fore.CYAN + Style.BRIGHT}[ EXIT ] Naoris Protocol Node - BOT{Style.RESET_ALL}")
