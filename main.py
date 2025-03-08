@@ -145,7 +145,7 @@ class NaorisProtocol:
                 print(f"{Fore.RED + Style.BRIGHT}Invalid input. Enter a number (1, 2 or 3).{Style.RESET_ALL}")
 
     async def user_login(self, address: str, proxy=None, retries=50):
-        url = "https://naorisprotocol.network/sec-api/auth/generateToken"
+        url = "https://naorisprotocol.network/ext-api/auth/generateToken"
         data = json.dumps({"wallet_address":address})
         headers = {
             **self.headers,
@@ -200,7 +200,7 @@ class NaorisProtocol:
         global whiteList
         if address in whiteList:
             return 
-        url = "https://naorisprotocol.network/sec-api/api/addWhitelist"
+        url = "https://naorisprotocol.network/ext-api/api/addWhitelist"
         data = json.dumps({"walletAddress":address, "url":"naorisprotocol.network"})
         headers = {
             **self.headers,
@@ -229,7 +229,7 @@ class NaorisProtocol:
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
     async def toggle_activated(self, address: str, device_hash: int, proxy=None, retries=50):
-        url = "https://naorisprotocol.network/sec-api/api/toggle"
+        url = "https://naorisprotocol.network/ext-api/api/toggle"
         data = json.dumps({"walletAddress":address, "state":"ON", "deviceHash":device_hash})
         headers = {
             **self.headers,
@@ -252,7 +252,7 @@ class NaorisProtocol:
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Turn On Protection Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
     async def send_heartbeats(self, address: str, device_hash: int, token: str, use_proxy: bool, proxy=None, retries=50):
-        url = "https://naorisprotocol.network/sec-api/api/produce-to-kafka"
+        url = "https://naorisprotocol.network/ext-api/api/produce-to-kafka"
         data = json.dumps({"topic":"device-heartbeat", "inputData":{"walletAddress":address, "deviceHash":device_hash}})
         headers = {
             **self.headers,

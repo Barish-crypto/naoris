@@ -12,13 +12,13 @@ fs.readFile('accounts.json', 'utf8', (err, data) => {
     const config = JSON.parse(data);
 
     // Lọc ra walletAddress và deviceHash
-    const result = config.map(item => `${item.walletAddress}:${item.deviceHash.join(',')}`);
+    const result = config.map(item => item.walletAddress);
 
     // Hiển thị kết quả
-    console.log(result.join('\n'));
+    console.log(result[0]);
 
     // Bạn có thể ghi kết quả vào file nếu muốn
-    fs.writeFile('output.txt', result.join('\n'), (err) => {
+    fs.writeFile('output.txt', result[0], (err) => {
       if (err) {
         console.error('Lỗi ghi file:', err);
       } else {
@@ -30,3 +30,4 @@ fs.readFile('accounts.json', 'utf8', (err, data) => {
     console.error('Lỗi xử lý JSON:', error);
   }
 });
+
