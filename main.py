@@ -144,7 +144,7 @@ class NaorisProtocol:
             except ValueError:
                 print(f"{Fore.RED + Style.BRIGHT}Invalid input. Enter a number (1, 2 or 3).{Style.RESET_ALL}")
 
-    async def user_login(self, address: str, proxy=None, retries=50):
+    async def user_login(self, address: str, proxy=None, retries=5):
         url = "https://naorisprotocol.network/ext-api/auth/generateToken"
         data = json.dumps({"wallet_address":address})
         headers = {
@@ -154,7 +154,7 @@ class NaorisProtocol:
         }
         for attempt in range(retries):
             try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=6000, impersonate="safari15_5")
+                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="safari15_5")
                 if response.status_code == 401:
                     return self.print_message(self.mask_account(address), proxy, Fore.RED, f"GET Access Token Failed: {Fore.YELLOW+Style.BRIGHT}Blocked By Cloudflare")
                     
@@ -169,18 +169,16 @@ class NaorisProtocol:
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"GET Access Token Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
 
     async def wallet_details(self, address: str, token: str, use_proxy: bool, proxy=None, retries=50):
-        url = "https://naorisprotocol.network/testnet-api/api/testnet/walletDetails"
-        data = json.dumps({"walletAddress":address})
+        url = "https://naorisprotocol.network/sec-api/api/wallet-details"
         headers = {
             **self.headers,
             "Authorization": f"Bearer {token}",
-            "Content-Length": str(len(data)),
             "Content-Type": "application/json",
             "Token": token
         }
         for attempt in range(retries):
             try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="safari15_5")
+                response = await asyncio.to_thread(requests.get, url=url, headers=headers, proxy=proxy, timeout=60, impersonate="safari15_5")
                 if response.status_code == 401:
                     token = await self.process_get_access_token(address, use_proxy)
                     headers["Authorization"] = f"Bearer {token}"
@@ -196,49 +194,48 @@ class NaorisProtocol:
                 
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"GET Wallet Details Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
-    async def add_whitelisted(self, address: str, token: str, use_proxy: bool, proxy=None, retries=5):
-        global whiteList
-        if address in whiteList:
-            return 
-        url = "https://naorisprotocol.network/ext-api/api/addWhitelist"
-        data = json.dumps({"walletAddress":address, "url":"naorisprotocol.network"})
-        headers = {
-            **self.headers,
-            "Authorization": f"Bearer {token}",
-            "Content-Length": str(len(data)),
-            "Content-Type": "application/json",
-            "Token": token
-        }
-        for attempt in range(retries):
-            try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="safari15_5")
-                if response.status_code == 401:
-                    token = await self.process_get_access_token(address, use_proxy)
-                    headers["Authorization"] = f"Bearer {token}"
-                    continue
-                elif response.status_code == 403:
-                    return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}Already Exists In Whitelist")
+    # async def add_whitelisted(self, address: str, token: str, use_proxy: bool, proxy=None, retries=5):
+    #     global whiteList
+    #     if address in whiteList:
+    #         return 
+    #     url = "https://naorisprotocol.network/ext-api/api/addWhitelist"
+    #     data = json.dumps({"walletAddress":address, "url":"naorisprotocol.network"})
+    #     headers = {
+    #         **self.headers,
+    #         "Authorization": f"Bearer {token}",
+    #         "Content-Length": str(len(data)),
+    #         "Content-Type": "application/json",
+    #         "Token": token
+    #     }
+    #     for attempt in range(retries):
+    #         try:
+    #             response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="safari15_5")
+    #             if response.status_code == 401:
+    #                 token = await self.process_get_access_token(address, use_proxy)
+    #                 headers["Authorization"] = f"Bearer {token}"
+    #                 continue
+    #             elif response.status_code == 403:
+    #                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}Already Exists In Whitelist")
 
-                response.raise_for_status()
-                return response.json()
-            except Exception as e:
-                if attempt < retries - 1:
-                    await asyncio.sleep(5)
-                    continue
+    #             response.raise_for_status()
+    #             return response.json()
+    #         except Exception as e:
+    #             if attempt < retries - 1:
+    #                 await asyncio.sleep(5)
+    #                 continue
                 
-                return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
+    #             return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
     async def toggle_activated(self, address: str, device_hash: int, proxy=None, retries=50):
-        url = "https://naorisprotocol.network/ext-api/api/toggle"
+        url = "https://naorisprotocol.network/sec-api/api/switch"
         data = json.dumps({"walletAddress":address, "state":"ON", "deviceHash":device_hash})
         headers = {
             **self.headers,
-            "Content-Length": str(len(data)),
             "Content-Type": "application/json"
         }
         for attempt in range(retries):
             try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=600, impersonate="safari15_5")
+                response = await asyncio.to_thread(requests.post, url=url, headers=headers, proxy=proxy, timeout=600, impersonate="safari15_5")
                 response.raise_for_status()
                 result = response.text
                 if result.strip() in ["Session started", "No action needed"]:
@@ -252,7 +249,7 @@ class NaorisProtocol:
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Turn On Protection Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
     async def send_heartbeats(self, address: str, device_hash: int, token: str, use_proxy: bool, proxy=None, retries=50):
-        url = "https://naorisprotocol.network/ext-api/api/produce-to-kafka"
+        url = "https://beat.naorisprotocol.network/api/ping"
         data = json.dumps({"topic":"device-heartbeat", "inputData":{"walletAddress":address, "deviceHash":device_hash}})
         headers = {
             **self.headers,
@@ -293,40 +290,11 @@ class NaorisProtocol:
 
             self.print_message(address, proxy, Fore.GREEN, "GET Access Token Success")
             return token
-            
-    async def process_user_earnings(self, address: str, token, use_proxy: bool):
-        while True:
-            proxy = self.get_next_proxy_for_account(address) if use_proxy else None
-
-            today_earning = "N/A"
-            total_earning = "N/A"
-            total_uptime = "N/A"
-
-            wallet = await self.wallet_details(address, token, use_proxy, proxy)
-            if wallet:
-                today_earning = wallet.get("todayEarnings")
-                total_earning = wallet.get("totalEarnings")
-                total_uptime = wallet.get("totalUptimeMinutes")
-
-            self.print_message(address, proxy, Fore.WHITE, 
-                f"Earning Today: {today_earning} PTS "
-                f"{Fore.MAGENTA + Style.BRIGHT}-{Style.RESET_ALL}"
-                f"{Fore.WHITE + Style.BRIGHT} Total: {total_earning} PTS {Style.RESET_ALL}"
-                f"{Fore.MAGENTA + Style.BRIGHT}-{Style.RESET_ALL}"
-                f"{Fore.CYAN + Style.BRIGHT} Uptime: {Style.RESET_ALL}"
-                f"{Fore.WHITE + Style.BRIGHT}{total_uptime} Minutes{Style.RESET_ALL}"
-            )
-
-            await asyncio.sleep(10 * 60)
+        
 
     async def process_activate_toggle(self, address, device_hash, token, use_proxy):
         global whiteList
         proxy = self.get_next_proxy_for_account(address) if use_proxy else None
-
-        # whitelist = await self.add_whitelisted(address, token, use_proxy, proxy)
-        # if whitelist and whitelist.get("message") == "url saved successfully":
-        #     whiteList.append(address)
-        #     self.print_message(address, proxy, Fore.GREEN, "Add to Whitelist Success")
         
         activate = None
         while activate is None:
@@ -354,8 +322,6 @@ class NaorisProtocol:
         if token:
             
             tasks = []
-            tasks.append(asyncio.create_task(self.process_user_earnings(address, token, use_proxy)))
-
             activate = await self.process_activate_toggle(address, device_hash, token, use_proxy)
             if activate:
                 tasks.append(asyncio.create_task(self.process_send_heatbeats(address, device_hash, token, use_proxy)))
