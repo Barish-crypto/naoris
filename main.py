@@ -227,7 +227,7 @@ class NaorisProtocol:
                 
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
-    async def toggle_activated(self, address: str, state: str, device_hash: int, proxy=None, retries=5):
+    async def toggle_activated(self, address: str, state: str, device_hash: int, proxy=None, retries=50):
         url = "https://naorisprotocol.network/sec-api/api/toggle"
         data = json.dumps({"walletAddress":address, "state":state, "deviceHash":device_hash})
         headers = {
@@ -277,7 +277,7 @@ class NaorisProtocol:
     #             self.rotate_proxy_for_account(address) if use_proxy else None
     #             return self.print_message(self.mask_account(address), proxy, Fore.RED, f"PING Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
             
-    async def send_heartbeats(self, address: str, token: str, use_proxy: bool, proxy=None, retries=5):
+    async def send_heartbeats(self, address: str, token: str, use_proxy: bool, proxy=None, retries=50):
         url = "https://beat.naorisprotocol.network/api/ping"
         headers = {
             **self.headers,
@@ -349,9 +349,9 @@ class NaorisProtocol:
     async def process_activate_toggle(self, address, device_hash, token, use_proxy):
         proxy = self.get_next_proxy_for_account(address) if use_proxy else None
 
-        whitelist = await self.add_whitelisted(address, token, use_proxy, proxy)
-        if whitelist and whitelist.get("message") == "url saved successfully":
-            self.print_message(address, proxy, Fore.GREEN, "Add to Whitelist Success")
+        # whitelist = await self.add_whitelisted(address, token, use_proxy, proxy)
+        # if whitelist and whitelist.get("message") == "url saved successfully":
+        #     self.print_message(address, proxy, Fore.GREEN, "Add to Whitelist Success")
 
         while True:
             deactivate = await self.toggle_activated(address, "OFF", device_hash, proxy)
