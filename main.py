@@ -227,7 +227,7 @@ class NaorisProtocol:
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
     async def toggle_activated(self, address: str, state: str, device_hash: int, proxy=None, retries=50):
-        url = "https://naorisprotocol.network/sec-api/api/toggle"
+        url = "https://naorisprotocol.network/sec-api/api/switch"
         data = json.dumps({"walletAddress":address, "state":state, "deviceHash":device_hash})
         headers = {
             **self.headers,
@@ -241,7 +241,6 @@ class NaorisProtocol:
                 return response.text
             except Exception as e:
                 if attempt < retries - 1:
-                    await asyncio.sleep(5)
                     continue
         
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Turn On Protection Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
