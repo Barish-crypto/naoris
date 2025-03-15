@@ -344,7 +344,7 @@ class NaorisProtocol:
                 f"{Fore.WHITE + Style.BRIGHT}{total_uptime} Minutes{Style.RESET_ALL}"
             )
 
-            await asyncio.sleep(10 * 60)
+            await asyncio.sleep(10)
 
     async def process_activate_toggle(self, address, device_hash, token, use_proxy):
         proxy = self.get_next_proxy_for_account(address) if use_proxy else None
@@ -376,10 +376,10 @@ class NaorisProtocol:
     async def process_accounts(self, address: str, device_hash: int, use_proxy: bool):
         token = await self.process_get_access_token(address, use_proxy)
         if token:
-            
             tasks = []
             tasks.append(asyncio.create_task(self.process_user_earnings(address, token, use_proxy)))
 
+            # Pass device_hash as an integer, not a string
             activate = await self.process_activate_toggle(address, device_hash, token, use_proxy)
             if activate:
                 tasks.append(asyncio.create_task(self.process_send_heatbeats(address, token, use_proxy)))
@@ -415,7 +415,7 @@ class NaorisProtocol:
                 tasks = []
                 for account in accounts:
                     address = account['walletAddress']
-                    device_hash = str(account['deviceHash'])
+                    device_hash = int(account['deviceHash'])
 
                     if address and device_hash:
                         tasks.append(asyncio.create_task(self.process_accounts(address, device_hash, use_proxy)))
