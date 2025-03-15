@@ -411,7 +411,7 @@ class NaorisProtocol:
                 tasks = []
                 for account in accounts:
                     address = account['walletAddress']
-                    device_hash = str(account['deviceHash'])
+                    device_hash = int(account['deviceHash'])
 
                     if address and device_hash:
                         tasks.append(asyncio.create_task(self.process_accounts(address, device_hash, use_proxy)))
