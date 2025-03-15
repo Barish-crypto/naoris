@@ -241,6 +241,7 @@ class NaorisProtocol:
                 return response.text
             except Exception as e:
                 if attempt < retries - 1:
+                    await asyncio.sleep(5)
                     continue
         
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Turn On Protection Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
@@ -297,7 +298,6 @@ class NaorisProtocol:
                 return response.json()
             except Exception as e:
                 if attempt < retries - 1:
-                    await asyncio.sleep(5)
                     continue
                 
                 if "502" in str(e):
@@ -352,16 +352,12 @@ class NaorisProtocol:
         #     self.print_message(address, proxy, Fore.GREEN, "Add to Whitelist Success")
 
         while True:
-            deactivate = await self.toggle_activated(address, "OFF", device_hash, proxy)
-            if deactivate and deactivate.strip() == "No action needed":
-                activate = await self.toggle_activated(address, "ON", device_hash, proxy)
-                if activate and activate.strip() == "Session started":
-                    self.print_message(address, proxy, Fore.GREEN, "Turn On Protection Success")
-                    return True
-                else:
-                    continue
-            else:
-                continue
+            toggle_activated = await self.toggle_activated(address, "ON", device_hash, use_proxy, proxy)
+            if toggle_activated:
+                self.print_message(address, proxy, Fore.GREEN, "Turn On Protection Success")
+
+            await asyncio.sleep(10)
+            return True
 
     async def process_send_heatbeats(self, address, token, use_proxy):
         while True:
