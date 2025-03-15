@@ -1,17 +1,32 @@
 const fs = require('fs');
 
-// Read the accounts.json file
-const accountsData = JSON.parse(fs.readFileSync('accounts.json', 'utf8'));
+// Đọc file accounts.json
+fs.readFile('accounts.json', 'utf8', (err, data) => {
+  if (err) {
+    console.error('Lỗi đọc file:', err);
+    return;
+  }
 
-// Update the accounts data to keep only the first deviceHash for each wallet
-const updatedAccountsData = accountsData.map(account => ({
-  walletAddress: account.walletAddress,
-  deviceHash: parseInt(account.deviceHash[0], 10), // Keep only the first device hash as an integer
-  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXRfYWRkcmVzcyI6IjB4YzQ3NWEzZjM2MmYyOTU2YzU3Y2EwZGQwZjI1ZjY2OTU2Y2VjYmM2MiIsImlkIjoiUFNnTUZVaE5vSVVnWnl5eSIsImlhdCI6MTczOTYyNDYxNywiZXhwIjoxNzQyMjE2NjE3fQ.v-QvZxRICtOz8mF7QsssZYCuk-ZE6n9G-ybGnHJ2sUE' // Add a token field
-}));
+  try {
+    // Chuyển đổi dữ liệu JSON thành đối tượng
+    const accounts = JSON.parse(data);
 
-// Write the updated data back to accounts.json
-fs.writeFileSync('accounts.json', JSON.stringify(updatedAccountsData, null, 2));
+    // Đổi giá trị deviceHash thành int
+    accounts.forEach(account => {
+      account.deviceHash = account.deviceHash.map(hash => parseInt(hash, 10));
+    });
 
-console.log('accounts.json has been updated with only one device per wallet and a token field.');
+    // Ghi lại dữ liệu đã chỉnh sửa vào file
+    fs.writeFile('accounts.json', JSON.stringify(accounts, null, 2), (err) => {
+      if (err) {
+        console.error('Lỗi ghi file:', err);
+      } else {
+        console.log('File đã được ghi!');
+      }
+    });
+
+  } catch (error) {
+    console.error('Lỗi xử lý JSON:', error);
+  }
+});
 

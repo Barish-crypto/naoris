@@ -29,7 +29,7 @@ function getProxyAgent(proxyUrl, index, total) {
 
 function loadProxies() {
   try {
-    const proxyFile = fs.readFileSync("proxy.txt", "utf8");
+    const proxyFile = fs.readFileSync("proxy1.txt", "utf8");
     proxyList = proxyFile
       .split("\n")
       .filter((line) => line.trim())
@@ -42,12 +42,12 @@ function loadProxies() {
       });
 
     if (proxyList.length === 0) {
-      throw new Error("No proxies found in proxy.txt");
+      throw new Error("No proxies found in proxy1.txt");
     }
     logMessage(
       null,
       null,
-      `Loaded ${proxyList.length} proxies from proxy.txt`,
+      `Loaded ${proxyList.length} proxies from proxy1.txt`,
       "success"
     );
     return true;

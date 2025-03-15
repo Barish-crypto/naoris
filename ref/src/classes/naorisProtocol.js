@@ -58,11 +58,11 @@ class naorisProtocol {
 
     const proxyOptions = this.proxy
       ? {
-          flag: [
-            "--proxy",
-            `http://${this.proxy.username ? `${this.proxy.username}:${this.proxy.password}@` : ""}${this.proxy.host}:${this.proxy.port}`,
-          ],
-        }
+        flag: [
+          "--proxy",
+          `http://${this.proxy.username ? `${this.proxy.username}:${this.proxy.password}@` : ""}${this.proxy.host}:${this.proxy.port}`,
+        ],
+      }
       : {};
 
     try {
