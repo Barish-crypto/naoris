@@ -146,7 +146,7 @@ class NaorisProtocol:
             except ValueError:
                 print(f"{Fore.RED + Style.BRIGHT}Invalid input. Enter a number (1, 2 or 3).{Style.RESET_ALL}")
 
-    async def user_login(self, address: str, proxy=None, retries=5):
+    async def user_login(self, address: str, proxy=None, retries=50):
         url = "https://naorisprotocol.network/sec-api/auth/generateToken"
         data = json.dumps({"wallet_address":address})
         headers = {
@@ -165,12 +165,11 @@ class NaorisProtocol:
                 return result['token']
             except Exception as e:
                 if attempt < retries - 1:
-                    await asyncio.sleep(5)
                     continue
                 
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"GET Access Token Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
 
-    async def wallet_details(self, address: str, token: str, use_proxy: bool, proxy=None, retries=5):
+    async def wallet_details(self, address: str, token: str, use_proxy: bool, proxy=None, retries=50):
         url = "https://naorisprotocol.network/testnet-api/api/testnet/walletDetails"
         data = json.dumps({"walletAddress":address})
         headers = {
@@ -198,7 +197,7 @@ class NaorisProtocol:
                 
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"GET Wallet Details Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
-    async def add_whitelisted(self, address: str, token: str, use_proxy: bool, proxy=None, retries=5):
+    async def add_whitelisted(self, address: str, token: str, use_proxy: bool, proxy=None, retries=50):
         url = "https://naorisprotocol.network/sec-api/api/addWhitelist"
         data = json.dumps({"walletAddress":address, "url":"naorisprotocol.network"})
         headers = {
@@ -344,7 +343,7 @@ class NaorisProtocol:
                 f"{Fore.WHITE + Style.BRIGHT}{total_uptime} Minutes{Style.RESET_ALL}"
             )
 
-            await asyncio.sleep(10 * 60)
+            await asyncio.sleep(10)
 
     async def process_activate_toggle(self, address, device_hash, token, use_proxy):
         proxy = self.get_next_proxy_for_account(address) if use_proxy else None
@@ -423,7 +422,6 @@ class NaorisProtocol:
                         tasks.append(asyncio.create_task(self.process_accounts(address, device_hash, use_proxy)))
 
                 await asyncio.gather(*tasks)
-                await asyncio.sleep(10)
 
         except FileNotFoundError:
             self.log(f"{Fore.RED}File 'accounts.txt' Not Found.{Style.RESET_ALL}")
