@@ -227,7 +227,7 @@ class NaorisProtocol:
                 return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
     
     async def toggle_activated(self, address: str, state: str, device_hash: int, proxy=None, retries=50):
-        url = "https://naorisprotocol.network/sec-api/api/switch"
+        url = "https://naorisprotocol.network/ext-api/api/toggle"
         data = json.dumps({"walletAddress":address, "state":state, "deviceHash":device_hash})
         headers = {
             **self.headers,
