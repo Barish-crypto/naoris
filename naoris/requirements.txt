@@ -1,4 +1,0 @@
-curl-cffi
-fake-useragent
-colorama
-pytz
