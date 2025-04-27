@@ -642,5 +642,29 @@
   {
     "walletAddress": "0x454da252bfef9dd7994181ecd583a8c9e0681a0d",
     "deviceHash": 694753791
+  },
+  {
+    "walletAddress": "0xe7b478434e7ef29c6caa52a53d2300a4cb4a4164",
+    "deviceHash": 694753791
+  },
+  {
+    "walletAddress": "0x36681307a1f3cd5e8e3e1c13a256f9a93a81c199",
+    "deviceHash": 694753791
+  },
+  {
+    "walletAddress": "0xf3439a250652625478eaf989594eeb4d66e96990",
+    "deviceHash": 694753791
+  },
+  {
+    "walletAddress": "0x53e5acdde51d7232ad790e6074a79a91c189ea21",
+    "deviceHash": 694753791
+  },
+  {
+    "walletAddress": "0x7b9e8e569ccb544cfb3fb14819c98aa02117dc90",
+    "deviceHash": 694753791
+  },
+  {
+    "walletAddress": "0x6be73d3beed1d09a525ff7609fe74e56e554190c",
+    "deviceHash": 694753791
   }
 ]
