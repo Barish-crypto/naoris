@@ -13,8 +13,7 @@ fs.readFile('accounts.json', 'utf8', (err, data) => {
 
     // Đổi giá trị deviceHash thành int
     accounts.forEach(account => {
-      account.deviceHash = Math.floor(Math.random() * 10);
-      account.deviceHash += Array(10).fill(0).map(() => Math.floor(Math.random() * 10).toString()).join('');
+      account.deviceHash = Math.floor(Math.random() * 10000000000);
     });
 
     // Ghi lại dữ liệu đã chỉnh sửa vào file
