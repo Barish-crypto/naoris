@@ -523,3 +523,38 @@ Mnomic Phrase: snap, sunset, slight, laundry, hole, almost, ahead, step, fatigue
 
 Address: 0x6be73d3beed1d09a525ff7609fe74e56e554190c
 Mnomic Phrase: retire, inherit, margin, toy, able, volcano, around, truly, turn, census, echo, oven
+
+-------------------------------------------------------------------------------------
+
+Address: 0x1c219603ae29e3439559d13cfead111b0ac05d5d
+Mnomic Phrase: desk, canvas, festival, fan, execute, message, used, way, slight, filter, salt, smoke
+
+-------------------------------------------------------------------------------------
+
+Address: 0x2e073fded78b7c6d056873fe2291dbddb666e772
+Mnomic Phrase: giant, diamond, century, rocket, bomb, gaze, blur, armed, voice, ankle, sheriff, sell
+
+-------------------------------------------------------------------------------------
+
+Address: 0x31d264d270b4c57866775c6c60c41c0b572fda36
+Mnomic Phrase: fever, creek, capable, zoo, police, basket, solar, trap, man, scorpion, trap, job
+
+-------------------------------------------------------------------------------------
+
+Address: 0x70d844011080f04f708c8ebccd9e9b5460658f1d
+Mnomic Phrase: pulse, trip, kidney, puzzle, youth, essence, sad, lumber, state, guitar, damp, orchard
+
+-------------------------------------------------------------------------------------
+
+Address: 0x4eff3b1bdc6d290e2748604dbff1f739c4dc3c78
+Mnomic Phrase: opera, virtual, surface, review, party, donkey, inquiry, habit, dizzy, shield, green, bargain
+
+-------------------------------------------------------------------------------------
+
+Address: 0x15e71f49b7094709906ef9edc6db7c29a7ba361b
+Mnomic Phrase: fossil, oyster, embark, unique, fade, roof, punch, valve, plate, mimic, stamp, fence
+
+-------------------------------------------------------------------------------------
+
+Address: 0xa410e8958cf6e8114f195fef4cfee92528a444fe
+Mnomic Phrase: erase, enough, boy, couple, century, depend, birth, between, clean, crouch, suspect, twelve
