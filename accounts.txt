@@ -558,3 +558,63 @@ Mnomic Phrase: fossil, oyster, embark, unique, fade, roof, punch, valve, plate, 
 
 Address: 0xa410e8958cf6e8114f195fef4cfee92528a444fe
 Mnomic Phrase: erase, enough, boy, couple, century, depend, birth, between, clean, crouch, suspect, twelve
+
+-------------------------------------------------------------------------------------
+
+Address: 0x2a2cf16d13007a06b0b38065bf7ca9ecf1968c2a
+Mnomic Phrase: connect, area, plug, oven, tennis, short, mother, clown, rotate, sing, divide, future
+
+-------------------------------------------------------------------------------------
+
+Address: 0x628ebbec0c7a292f79ba347e6eed520a3d738f94
+Mnomic Phrase: game, bitter, spray, enjoy, mention, aunt, road, auction, fee, comfort, emotion, useful
+
+-------------------------------------------------------------------------------------
+
+Address: 0x7c3a71acade3d7794af8f3d0451dc65ada6e17a5
+Mnomic Phrase: grace, garment, tail, orbit, pyramid, amateur, hello, enforce, luxury, enter, zero, divorce
+
+-------------------------------------------------------------------------------------
+
+Address: 0x766974e73c02a6b01ec5047fb5f6d95b1c107cce
+Mnomic Phrase: suggest, erosion, jump, beyond, miss, float, ladder, odor, actor, connect, bulk, when
+
+-------------------------------------------------------------------------------------
+
+Address: 0x0913f3c62b958bdb2a97fb471a91f23fe9f4128e
+Mnomic Phrase: loud, sweet, rich, find, motor, gauge, swim, orchard, erupt, shine, bargain, diesel
+
+-------------------------------------------------------------------------------------
+
+Address: 0x5466b467e3816452052e05611c5cfea5d3f78f1c
+Mnomic Phrase: job, alien, wrong, afford, rhythm, panther, visit, enrich, museum, situate, annual, modify
+
+-------------------------------------------------------------------------------------
+
+Address: 0x3c1efd3403a0615775c921e54ca3f1c3e0c6c136
+Mnomic Phrase: panther, scrap, pelican, blood, close, city, degree, minor, citizen, flame, employ, apple
+
+-------------------------------------------------------------------------------------
+
+Address: 0x1dfdcf1a465e3a538fe00fbe48fc023fcb4a5389
+Mnomic Phrase: soft, turtle, eagle, wild, wagon, cup, sing, caught, isolate, suspect, lyrics, salmon
+
+-------------------------------------------------------------------------------------
+
+Address: 0x518615bf8b29c3c0a8cfde7a522175c231a7c801
+Mnomic Phrase: smart, dance, paper, lottery, tide, text, sure, unusual, decade, spy, glad, turn
+
+-------------------------------------------------------------------------------------
+
+Address: 0x8c360c19192bd193c9ced80201cbc80483a82b04
+Mnomic Phrase: good, they, puzzle, color, tuition, tell, jump, plate, upgrade, envelope, daughter, artist
+
+-------------------------------------------------------------------------------------
+
+Address: 0x3e5a12444bed42aa5e8af19f3c4dd3e7b7e845c6
+Mnomic Phrase: foot, miracle, lawsuit, vibrant, brand, before, material, room, series, account, neither, message
+
+-------------------------------------------------------------------------------------
+
+Address: 0xf03fa0775066666b34f16260f0917651ebb73985
+Mnomic Phrase: remain, brass, motion, drop, pilot, buddy, nut, current, jump, cliff, globe, avoid
