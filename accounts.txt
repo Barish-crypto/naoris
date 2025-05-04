@@ -678,3 +678,23 @@ Mnomic Phrase: dinner, husband, silk, history, plunge, similar, begin, music, fe
 
 Address: 0x5516b5a48cdfb10bba3f7c5b5fd4be1ad9fb7205
 Mnomic Phrase: rely, act, travel, minor, umbrella, action, quarter, jealous, planet, carbon, session, soon
+
+-------------------------------------------------------------------------------------
+
+Address: 0xd9c1dd6dd8486dbfcd4d1148600eec08b53470d7
+Mnomic Phrase: write, segment, beach, crisp, absorb, garlic, false, merit, floor, book, vendor, snack
+
+-------------------------------------------------------------------------------------
+
+Address: 0x0ae9262b60fdb28223316b6ec54cceedcd018bab
+Mnomic Phrase: mimic, empower, whisper, ability, genuine, chat, model, borrow, ride, system, tonight, slight
+
+-------------------------------------------------------------------------------------
+
+Address: 0xebf3ce98c7552aa0a69ca8b203b23f46a2dd15d9
+Mnomic Phrase: duty, laundry, network, all, whip, shock, drop, swallow, crime, bitter, reflect, interest
+
+-------------------------------------------------------------------------------------
+
+Address: 0x8b4cc7bbd4820c7dc519b1ae82fe7d4ec5e981cc
+Mnomic Phrase: property, canyon, click, noodle, choose, hair, must, journey, dress, elder, beyond, faith
