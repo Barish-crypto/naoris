@@ -345,7 +345,7 @@ class NaorisProtocol:
             if heartbeat:
                 self.print_message(address, proxy, Fore.GREEN, "PING Success")
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(20)
 
     async def process_accounts(self, address: str, device_hash: int, use_proxy: bool):
         token = await self.process_get_access_token(address, use_proxy)
