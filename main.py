@@ -256,9 +256,10 @@ class NaorisProtocol:
             "Content-Length": "2",
             "Content-Type": "application/json"
         }
+        payload = {}
         for attempt in range(retries):
             try:
-                response = await asyncio.to_thread(requests.post, url=url, headers=headers, json={}, proxy=proxy, timeout=60, impersonate="safari15_5")
+                response = await asyncio.to_thread(requests.post, url=url, headers=headers, json=payload, proxy=proxy, timeout=60, impersonate="safari15_5")
                 if response.status_code == 401:
                     token = await self.process_get_access_token(address, use_proxy)
                     headers["Authorization"] = f"Bearer {token}"
