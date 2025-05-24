@@ -200,13 +200,11 @@ class NaorisProtocol:
     
     async def add_whitelisted(self, address: str, token: str, use_proxy: bool, proxy=None, retries=5):
         url = "https://naorisprotocol.network/sec-api/api/addWhitelist"
-        data = json.dumps({"walletAddress":address, "url":"naorisprotocol.network"})
+        data = json.dumps({"walletAddress":address, "url":"app.depined.org"})
         headers = {
             **self.headers,
             "Authorization": f"Bearer {token}",
-            "Content-Length": str(len(data)),
             "Content-Type": "application/json",
-            "Token": token
         }
         for attempt in range(retries):
             try:
@@ -258,7 +256,6 @@ class NaorisProtocol:
         headers = {
             **self.headers,
             "Authorization": f"Bearer {token}",
-            "Content-Length": str(len(data)),
             "Content-Type": "application/json"
         }
         for attempt in range(retries):
@@ -278,7 +275,6 @@ class NaorisProtocol:
         headers = {
             **self.headers,
             "Authorization": f"Bearer {token}",
-            "Content-Length": "2",
             "Content-Type": "application/json"
         }
         payload = {}
@@ -343,6 +339,16 @@ class NaorisProtocol:
 
             await asyncio.sleep(10 * 60)
 
+    async def process_htb_event(self, address: str, token: str, device_hash: int, use_proxy: bool):
+        while True:
+            proxy = self.get_next_proxy_for_account(address) if use_proxy else None
+            htb_result = await self.htb_event(address, token, device_hash, proxy)
+            if htb_result:
+                self.print_message(address, proxy, Fore.GREEN, "HTB Event Success")
+            else:
+                self.print_message(address, proxy, Fore.RED, "HTB Event Failed")
+            await asyncio.sleep(3600)  # Chờ 1 giờ (3600 giây) trước khi gọi lại
+
     async def process_activate_toggle(self, address, device_hash, token, use_proxy):
         proxy = self.get_next_proxy_for_account(address) if use_proxy else None
 
@@ -376,16 +382,9 @@ class NaorisProtocol:
         token = await self.process_get_access_token(address, use_proxy)
         if token:
             tasks = []
-            # Thêm tác vụ lấy thông tin thu nhập
+            # Thêm các tác vụ bất đồng bộ
             tasks.append(asyncio.create_task(self.process_user_earnings(address, token, use_proxy)))
-
-            # Thêm gọi hàm htb_event
-            proxy = self.get_next_proxy_for_account(address) if use_proxy else None
-            htb_result = await self.htb_event(address, token, device_hash, proxy)
-            if htb_result:
-                self.print_message(address, proxy, Fore.GREEN, "HTB Event Success")
-            else:
-                self.print_message(address, proxy, Fore.RED, "HTB Event Failed")
+            tasks.append(asyncio.create_task(self.process_htb_event(address, token, device_hash, use_proxy)))
 
             # Kích hoạt toggle (bật/tắt protection)
             activate = await self.process_activate_toggle(address, device_hash, token, use_proxy)
