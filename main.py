@@ -446,7 +446,7 @@ class NaorisProtocol:
                 tasks = []
                 for account in accounts:
                     if account:
-                        address = account["Address"].lower()
+                        address = account["walletAddress"].lower()
                         device_hash = int(account["deviceHash"])
 
                         if address and device_hash:
