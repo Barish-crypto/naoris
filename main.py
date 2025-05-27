@@ -9,7 +9,7 @@ import shutil
 wib = pytz.timezone('Asia/Jakarta')
 
 class NaorisProtocol:
-    def __init__(self, telegram_token=None, telegram_chat_id=None):
+    def __init__(self) -> None:
         self.headers = {
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -27,8 +27,6 @@ class NaorisProtocol:
         self.account_proxies = {}
         self.access_tokens = {}
         self.refresh_tokens = {}
-        self.telegram_token = telegram_token  # Token bot Telegram
-        self.telegram_chat_id = telegram_chat_id  # Chat ID nhóm/kênh
 
     def clear_terminal(self):
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -41,31 +39,35 @@ class NaorisProtocol:
         )
 
     def welcome(self):
-        figlet = Figlet(font='slant')
-        banner = figlet.renderText("Naoris Bot")
-        terminal_width = shutil.get_terminal_size().columns
-        centered_banner = "\n".join(line.center(terminal_width) for line in banner.splitlines())
-        print(Fore.CYAN + Style.BRIGHT + centered_banner)
-        print(Fore.GREEN + Style.BRIGHT + "Auto Ping Naoris by Bg WIN".center(terminal_width))
+       figlet = Figlet(font='slant')  # Bisa juga: 'standard', 'big', 'banner3-D', dll
+       banner = figlet.renderText("Naoris Bot")
+
+       terminal_width = shutil.get_terminal_size().columns
+       centered_banner = "\n".join(line.center(terminal_width) for line in banner.splitlines())
+
+       print(Fore.CYAN + Style.BRIGHT + centered_banner)
+       print(Fore.GREEN + Style.BRIGHT + "Auto Ping Naoris by Bg WIN".center(terminal_width))
 
     def format_seconds(self, seconds):
         hours, remainder = divmod(seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         return f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}"
-
+    
     def load_accounts(self):
         filename = "accounts.json"
         try:
             if not os.path.exists(filename):
                 self.log(f"{Fore.RED}File {filename} Not Found.{Style.RESET_ALL}")
-                return []
+                return
+
             with open(filename, 'r') as file:
                 data = json.load(file)
-                return data if isinstance(data, list) else []
+                if isinstance(data, list):
+                    return data
+                return []
         except json.JSONDecodeError:
-            self.log(f"{Fore.RED}Invalid JSON in {filename}.{Style.RESET_ALL}")
             return []
-
+    
     async def load_proxies(self, use_proxy_choice: int):
         filename = "proxy.txt"
         try:
@@ -73,33 +75,34 @@ class NaorisProtocol:
                 response = await asyncio.to_thread(requests.get, "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/all.txt")
                 response.raise_for_status()
                 content = response.text
-                with open(filename, 'w', encoding='utf-8') as f:
+                with open(filename, 'w') as f:
                     f.write(content)
-                self.proxies = [line.strip() for line in content.splitlines() if line.strip()]
+                self.proxies = content.splitlines()
             else:
                 if not os.path.exists(filename):
                     self.log(f"{Fore.RED + Style.BRIGHT}File {filename} Not Found.{Style.RESET_ALL}")
                     return
-                with open(filename, 'r', encoding='utf-8') as f:
-                    self.proxies = [line.strip() for line in f.read().splitlines() if line.strip()]
+                with open(filename, 'r') as f:
+                    self.proxies = f.read().splitlines()
             
             if not self.proxies:
                 self.log(f"{Fore.RED + Style.BRIGHT}No Proxies Found.{Style.RESET_ALL}")
                 return
 
             self.log(
-                f"{Fore.GREEN + Style.BRIGHT}Proxies Total: {Style.RESET_ALL}"
+                f"{Fore.GREEN + Style.BRIGHT}Proxies Total  : {Style.RESET_ALL}"
                 f"{Fore.WHITE + Style.BRIGHT}{len(self.proxies)}{Style.RESET_ALL}"
             )
         
         except Exception as e:
             self.log(f"{Fore.RED + Style.BRIGHT}Failed To Load Proxies: {e}{Style.RESET_ALL}")
-            await self.send_telegram_notification(f"Failed to load proxies: {str(e)}")
             self.proxies = []
 
-    def check_proxy_schemes(self, proxy):
+    def check_proxy_schemes(self, proxies):
         schemes = ["http://", "https://", "socks4://", "socks5://"]
-        return proxy if any(proxy.startswith(scheme) for scheme in schemes) else f"http://{proxy}"
+        if any(proxies.startswith(scheme) for scheme in schemes):
+            return proxies
+        return f"http://{proxies}"
 
     def get_next_proxy_for_account(self, account):
         if account not in self.account_proxies:
@@ -119,36 +122,21 @@ class NaorisProtocol:
         return proxy
     
     def mask_account(self, account):
-        return account[:6] + '*' * 6 + account[-6:]
-
+        mask_account = account[:6] + '*' * 6 + account[-6:]
+        return mask_account
+    
     def print_message(self, address, proxy, color, message):
-        proxy_display = proxy or "No Proxy"
         self.log(
             f"{Fore.CYAN + Style.BRIGHT}[ Account:{Style.RESET_ALL}"
             f"{Fore.WHITE + Style.BRIGHT} {self.mask_account(address)} {Style.RESET_ALL}"
             f"{Fore.MAGENTA + Style.BRIGHT}-{Style.RESET_ALL}"
             f"{Fore.CYAN + Style.BRIGHT} Proxy: {Style.RESET_ALL}"
-            f"{Fore.WHITE + Style.BRIGHT}{proxy_display}{Style.RESET_ALL}"
+            f"{Fore.WHITE + Style.BRIGHT}{proxy}{Style.RESET_ALL}"
             f"{Fore.MAGENTA + Style.BRIGHT} - {Style.RESET_ALL}"
             f"{Fore.CYAN + Style.BRIGHT}Status:{Style.RESET_ALL}"
             f"{color + Style.BRIGHT} {message} {Style.RESET_ALL}"
             f"{Fore.CYAN + Style.BRIGHT}]{Style.RESET_ALL}"
         )
-
-    async def send_telegram_notification(self, message):
-        """Gửi thông báo qua Telegram"""
-        if not self.telegram_token or not self.telegram_chat_id:
-            self.log(f"{Fore.YELLOW}Telegram not configured. Skipping notification.{Style.RESET_ALL}")
-            return
-        url = f"https://api.telegram.org/bot{self.telegram_token}/sendMessage"
-        data = json.dumps({"chat_id": self.telegram_chat_id, "text": message})
-        headers = {"Content-Type": "application/json", "Content-Length": str(len(data))}
-        try:
-            response = await asyncio.to_thread(requests.post, url, headers=headers, data=data, timeout=10, impersonate="chrome110")
-            response.raise_for_status()
-            self.log(f"{Fore.GREEN}Telegram notification sent: {message}{Style.RESET_ALL}")
-        except Exception as e:
-            self.log(f"{Fore.RED}Failed to send Telegram notification: {str(e)}{Style.RESET_ALL}")
 
     def print_question(self):
         while True:
@@ -157,6 +145,7 @@ class NaorisProtocol:
                 print("2. Run With Private Proxy")
                 print("3. Run Without Proxy")
                 choose = int(input("Choose [1/2/3] -> ").strip())
+
                 if choose in [1, 2, 3]:
                     proxy_type = (
                         "Run With Monosans Proxy" if choose == 1 else 
@@ -165,13 +154,14 @@ class NaorisProtocol:
                     )
                     print(f"{Fore.GREEN + Style.BRIGHT}{proxy_type} Selected.{Style.RESET_ALL}")
                     return choose
-                print(f"{Fore.RED + Style.BRIGHT}Please enter either 1, 2 or 3.{Style.RESET_ALL}")
+                else:
+                    print(f"{Fore.RED + Style.BRIGHT}Please enter either 1, 2 or 3.{Style.RESET_ALL}")
             except ValueError:
                 print(f"{Fore.RED + Style.BRIGHT}Invalid input. Enter a number (1, 2 or 3).{Style.RESET_ALL}")
 
     async def generate_token(self, address: str, proxy=None, retries=50):
         url = f"{self.BASE_API}/sec-api/auth/gt-event"
-        data = json.dumps({"wallet_address": address})
+        data = json.dumps({"wallet_address":address})
         headers = {
             **self.headers,
             "Content-Length": str(len(data)),
@@ -181,22 +171,19 @@ class NaorisProtocol:
             try:
                 response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="chrome110")
                 if response.status_code == 404:
-                    self.print_message(address, proxy, Fore.RED, f"Generate Token Failed: {Fore.YELLOW+Style.BRIGHT}Join Testnet & Complete Required Tasks First")
-                    await self.send_telegram_notification(f"Account {self.mask_account(address)}: Generate Token Failed - Join Testnet & Complete Required Tasks")
-                    return None
+                    return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Generate Token Failed: {Fore.YELLOW+Style.BRIGHT}Join Testnet & Complete Required Tasks First")
+                
                 response.raise_for_status()
                 return response.json()
             except Exception as e:
                 if attempt < retries - 1:
                     await asyncio.sleep(5)
                     continue
-                self.print_message(address, proxy, Fore.RED, f"Generate Token Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
-                await self.send_telegram_notification(f"Account {self.mask_account(address)}: Generate Token Failed - {str(e)}")
-                return None
-
+                return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Generate Token Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
+    
     async def refresh_token(self, address: str, use_proxy: bool, proxy=None, retries=50):
         url = f"{self.BASE_API}/sec-api/auth/refresh"
-        data = json.dumps({"refreshToken": self.refresh_tokens.get(address)})
+        data = json.dumps({"refreshToken":self.refresh_tokens[address]})
         headers = {
             **self.headers,
             "Content-Length": str(len(data)),
@@ -207,23 +194,22 @@ class NaorisProtocol:
                 response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="chrome110")
                 if response.status_code == 401:
                     await self.process_generate_token(address, use_proxy)
-                    data = json.dumps({"refreshToken": self.refresh_tokens.get(address)})
+                    data = json.dumps({"refreshToken":self.refresh_tokens[address]})
                     continue
+                
                 response.raise_for_status()
                 return response.json()
             except Exception as e:
                 if attempt < retries - 1:
                     await asyncio.sleep(5)
                     continue
-                self.print_message(address, proxy, Fore.RED, f"Refreshing Token Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
-                await self.send_telegram_notification(f"Account {self.mask_account(address)}: Refreshing Token Failed - {str(e)}")
-                return None
-
+                return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Refreshing Token Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
+            
     async def wallet_details(self, address: str, proxy=None, retries=50):
         url = f"{self.BASE_API}/sec-api/api/wallet-details"
         headers = {
             **self.headers,
-            "Authorization": f"Bearer {self.access_tokens.get(address)}"
+            "Authorization": f"Bearer {self.access_tokens[address]}"
         }
         for attempt in range(retries):
             try:
@@ -234,16 +220,14 @@ class NaorisProtocol:
                 if attempt < retries - 1:
                     await asyncio.sleep(5)
                     continue
-                self.print_message(address, proxy, Fore.RED, f"GET Wallet Details Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
-                await self.send_telegram_notification(f"Account {self.mask_account(address)}: GET Wallet Details Failed - {str(e)}")
-                return None
-
+                return self.print_message(self.mask_account(address), proxy, Fore.RED, f"GET Wallet Details Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
+    
     async def add_whitelist(self, address: str, proxy=None, retries=50):
         url = f"{self.BASE_API}/sec-api/api/addWhitelist"
-        data = json.dumps({"walletAddress": address, "url": "naorisprotocol.network"})
+        data = json.dumps({"walletAddress":address, "url":"naorisprotocol.network"})
         headers = {
             **self.headers,
-            "Authorization": f"Bearer {self.access_tokens.get(address)}",
+            "Authorization": f"Bearer {self.access_tokens[address]}",
             "Content-Length": str(len(data)),
             "Content-Type": "application/json"
         }
@@ -251,24 +235,22 @@ class NaorisProtocol:
             try:
                 response = await asyncio.to_thread(requests.post, url=url, headers=headers, data=data, proxy=proxy, timeout=60, impersonate="chrome110")
                 if response.status_code == 409:
-                    self.print_message(address, proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}URL Already Exists In Whitelist")
-                    return None
+                    return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}URL Already Exists In Whitelist")
+                
                 response.raise_for_status()
                 return response.json()
             except Exception as e:
                 if attempt < retries - 1:
                     await asyncio.sleep(5)
                     continue
-                self.print_message(address, proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
-                await self.send_telegram_notification(f"Account {self.mask_account(address)}: Add to Whitelist Failed - {str(e)}")
-                return None
-
+                return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Add to Whitelist Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
+    
     async def toggle_activation(self, address: str, device_hash: int, state: str, proxy=None, retries=50):
         url = f"{self.BASE_API}/sec-api/api/switch"
-        data = json.dumps({"walletAddress": address, "state": state, "deviceHash": device_hash})
+        data = json.dumps({"walletAddress":address, "state":state, "deviceHash":device_hash})
         headers = {
             **self.headers,
-            "Authorization": f"Bearer {self.access_tokens.get(address)}",
+            "Authorization": f"Bearer {self.access_tokens[address]}",
             "Content-Length": str(len(data)),
             "Content-Type": "application/json"
         }
@@ -281,16 +263,14 @@ class NaorisProtocol:
                 if attempt < retries - 1:
                     await asyncio.sleep(5)
                     continue
-                self.print_message(address, proxy, Fore.RED, f"Turn On Protection Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
-                await self.send_telegram_notification(f"Account {self.mask_account(address)}: Turn On Protection Failed - {str(e)}")
-                return None
-
+                return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Turn On Protection Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
+    
     async def initiate_msg_product(self, address: str, device_hash: int, proxy=None, retries=50):
         url = f"{self.PING_API}/sec-api/api/htb-event"
-        data = json.dumps({"inputData": {"walletAddress": address, "deviceHash": device_hash}})
+        data = json.dumps({"inputData":{"walletAddress":address, "deviceHash":device_hash}})
         headers = {
             **self.headers,
-            "Authorization": f"Bearer {self.access_tokens.get(address)}",
+            "Authorization": f"Bearer {self.access_tokens[address]}",
             "Content-Length": str(len(data)),
             "Content-Type": "application/json"
         }
@@ -303,15 +283,13 @@ class NaorisProtocol:
                 if attempt < retries - 1:
                     await asyncio.sleep(5)
                     continue
-                self.print_message(address, proxy, Fore.RED, f"Initiate Message Production Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
-                await self.send_telegram_notification(f"Account {self.mask_account(address)}: Initiate Message Production Failed - {str(e)}")
-                return None
-
+                return self.print_message(self.mask_account(address), proxy, Fore.RED, f"Initiate Message Production Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
+    
     async def perform_ping(self, address: str, proxy=None, retries=50):
         url = f"{self.PING_API}/api/ping"
         headers = {
             **self.headers,
-            "Authorization": f"Bearer {self.access_tokens.get(address)}",
+            "Authorization": f"Bearer {self.access_tokens[address]}",
             "Content-Length": "2",
             "Content-Type": "application/json"
         }
@@ -326,33 +304,11 @@ class NaorisProtocol:
                 if attempt < retries - 1:
                     await asyncio.sleep(5)
                     continue
-                self.print_message(address, proxy, Fore.RED, f"PING Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
-                await self.send_telegram_notification(f"Account {self.mask_account(address)}: PING Failed - {str(e)}")
-                return None
-
-    async def report_earnings(self, accounts):
-        """Báo cáo tổng điểm PTS của tất cả tài khoản"""
-        total_earnings = 0
-        report = []
-        for account in accounts:
-            address = account["walletAddress"].lower()
-            proxy = self.get_next_proxy_for_account(address)
-            wallet = await self.wallet_details(address, proxy)
-            earnings = wallet.get("message", {}).get("totalEarnings", 0) if wallet else 0
-            total_earnings += earnings
-            report.append(f"Account {self.mask_account(address)}: {earnings} PTS")
-        report_message = f"📊 Naoris Bot Earnings Report ({datetime.now().astimezone(wib).strftime('%x %X %Z')}):\nTotal Earnings: {total_earnings} PTS\n" + "\n".join(report)
-        self.log(f"{Fore.GREEN}Earnings Report:\n{report_message}{Style.RESET_ALL}")
-        await self.send_telegram_notification(report_message)
-
-    async def schedule_earnings_report(self, accounts, interval=24*3600):
-        """Lên lịch báo cáo điểm định kỳ"""
-        while True:
-            await self.report_earnings(accounts)
-            await asyncio.sleep(interval)
+                return self.print_message(self.mask_account(address), proxy, Fore.RED, f"PING Failed: {Fore.YELLOW+Style.BRIGHT}{str(e)}")
 
     async def process_generate_token(self, address: str, use_proxy: bool):
         proxy = self.get_next_proxy_for_account(address) if use_proxy else None
+
         token = None
         while token is None:
             token = await self.generate_token(address, proxy)
@@ -360,67 +316,87 @@ class NaorisProtocol:
                 await asyncio.sleep(5)
                 proxy = self.rotate_proxy_for_account(address) if use_proxy else None
                 continue
+            
             self.access_tokens[address] = token["token"]
             self.refresh_tokens[address] = token["refreshToken"]
+
             self.print_message(address, proxy, Fore.GREEN, "Generate Token Success")
-            await self.send_telegram_notification(f"Account {self.mask_account(address)}: Generate Token Success")
+
             return self.access_tokens[address], self.refresh_tokens[address]
 
     async def process_refresh_token(self, address: str, use_proxy: bool):
         while True:
             await asyncio.sleep(30 * 60)
             proxy = self.get_next_proxy_for_account(address) if use_proxy else None
-            token = await self.refresh_token(address, use_proxy, proxy)
-            if token:
+
+            token = None
+            while token is None:
+                token = await self.refresh_token(address, use_proxy, proxy)
+                if not token:
+                    await asyncio.sleep(5)
+                    proxy = self.rotate_proxy_for_account(address) if use_proxy else None
+                    continue
+                
                 self.access_tokens[address] = token["token"]
                 self.refresh_tokens[address] = token["refreshToken"]
+
                 self.print_message(address, proxy, Fore.GREEN, "Refreshing Token Success")
-                await self.send_telegram_notification(f"Account {self.mask_account(address)}: Refreshing Token Success")
 
     async def process_add_whitelist(self, address: str, use_proxy: bool):
         proxy = self.get_next_proxy_for_account(address) if use_proxy else None
+
         whitelist = await self.add_whitelist(address, proxy)
         if whitelist and whitelist.get("message") == "url saved successfully":
             self.print_message(address, proxy, Fore.GREEN, "Add to Whitelist Success")
-            await self.send_telegram_notification(f"Account {self.mask_account(address)}: Add to Whitelist Success")
+
         return True
 
     async def process_get_wallet_details(self, address: str, use_proxy: bool):
         await self.process_add_whitelist(address, use_proxy)
+
         while True:
             proxy = self.get_next_proxy_for_account(address) if use_proxy else None
+
             total_earning = "N/A"
+
             wallet = await self.wallet_details(address, proxy)
             if wallet:
                 total_earning = wallet.get("message", {}).get("totalEarnings", 0)
-            self.print_message(address, proxy, Fore.WHITE, f"Earning Total: {total_earning} PTS")
-            await asyncio.sleep(15 * 60)
 
+            self.print_message(address, proxy, Fore.WHITE, f"Earning Total: {total_earning} PTS")
+
+            await asyncio.sleep(15 * 60)
+    
     async def process_send_ping(self, address: str, use_proxy: bool):
         while True:
             proxy = self.get_next_proxy_for_account(address) if use_proxy else None
+
             ping = await self.perform_ping(address, proxy)
             if ping and ping.strip() == "Ping Success!!":
                 self.print_message(address, proxy, Fore.GREEN, "PING Success")
-            await asyncio.sleep(10)
 
+            await asyncio.sleep(10)
+        
     async def process_initiate_msg_product(self, address: str, device_hash: int, use_proxy: bool):
         while True:
             proxy = self.get_next_proxy_for_account(address) if use_proxy else None
+
             initiate = await self.initiate_msg_product(address, device_hash, proxy)
             if initiate and initiate.get("message") == "Message production initiated":
                 self.print_message(address, proxy, Fore.GREEN, "Message Production Initiated")
-            await asyncio.sleep(10 * 60)
 
+            await asyncio.sleep(10 * 60)
+    
     async def process_activate_toggle(self, address, device_hash, use_proxy):
         while True:
             proxy = self.get_next_proxy_for_account(address) if use_proxy else None
+
             deactivate = await self.toggle_activation(address, device_hash, "OFF", proxy)
             if deactivate and deactivate.strip() in ["Session ended and daily usage updated", "No action needed"]:
                 activate = await self.toggle_activation(address, device_hash, "ON", proxy)
                 if activate and activate.strip() == "Session started":
                     self.print_message(address, proxy, Fore.GREEN, "Turn On Protection Success")
-                    await self.send_telegram_notification(f"Account {self.mask_account(address)}: Turn On Protection Success")
+
                     tasks = [
                         asyncio.create_task(self.process_initiate_msg_product(address, device_hash, use_proxy)),
                         asyncio.create_task(self.process_send_ping(address, use_proxy))
@@ -430,9 +406,9 @@ class NaorisProtocol:
                     continue
             else:
                 continue
-
+        
     async def process_accounts(self, address: str, device_hash: int, use_proxy: bool):
-        self.access_tokens[address], self.refresh_tokens[address] = await self.process_generate_token(address, use_proxy)
+        self.access_tokens[address], self.refresh_tokens[address]= await self.process_generate_token(address, use_proxy)
         if self.access_tokens[address] and self.refresh_tokens[address]:
             tasks = [
                 asyncio.create_task(self.process_refresh_token(address, use_proxy)),
@@ -445,13 +421,14 @@ class NaorisProtocol:
         try:
             accounts = self.load_accounts()
             if not accounts:
-                error_msg = "No Accounts Loaded."
-                self.log(f"{Fore.RED}{error_msg}{Style.RESET_ALL}")
-                await self.send_telegram_notification(f"🚨 Naoris Bot Error: {error_msg}")
+                self.log(f"{Fore.RED}No Accounts Loaded.{Style.RESET_ALL}")
                 return
 
             use_proxy_choice = self.print_question()
-            use_proxy = use_proxy_choice in [1, 2]
+
+            use_proxy = False
+            if use_proxy_choice in [1, 2]:
+                use_proxy = True
 
             self.clear_terminal()
             self.welcome()
@@ -464,33 +441,32 @@ class NaorisProtocol:
                 await self.load_proxies(use_proxy_choice)
 
             self.log(f"{Fore.CYAN + Style.BRIGHT}={Style.RESET_ALL}"*65)
-            await self.send_telegram_notification(f"🚀 Naoris Bot Started with {len(accounts)} accounts at {datetime.now().astimezone(wib).strftime('%x %X %Z')}")
-
-            # Lên lịch báo cáo điểm mỗi 24 giờ
-            asyncio.create_task(self.schedule_earnings_report(accounts))
 
             while True:
-                tasks = [asyncio.create_task(self.process_accounts(account["walletAddress"].lower(), int(account["deviceHash"]), use_proxy))
-                         for account in accounts if account and "walletAddress" in account and "deviceHash" in account]
+                tasks = []
+                for account in accounts:
+                    if account:
+                        address = account["walletAddress"].lower()
+                        device_hash = int(account["deviceHash"])
+
+                        if address and device_hash:
+                            tasks.append(asyncio.create_task(self.process_accounts(address, device_hash, use_proxy)))
+
                 await asyncio.gather(*tasks)
                 await asyncio.sleep(10)
 
         except Exception as e:
-            error_msg = f"Critical Error: {str(e)}"
-            self.log(f"{Fore.RED+Style.BRIGHT}{error_msg}{Style.RESET_ALL}")
-            await self.send_telegram_notification(f"🚨 Naoris Bot Critical Error: {str(e)}")
+            self.log(f"{Fore.RED+Style.BRIGHT}Error: {e}{Style.RESET_ALL}")
             raise e
+
 
 if __name__ == "__main__":
     try:
-        bot = NaorisProtocol(
-            telegram_token="7588400911:AAF1R2fs-UyJXCxyy-ypL8NPtCtkn9e7rAs",
-            telegram_chat_id="5133573674"
-        )
+        bot = NaorisProtocol()
         asyncio.run(bot.main())
     except KeyboardInterrupt:
         print(
             f"{Fore.CYAN + Style.BRIGHT}[ {datetime.now().astimezone(wib).strftime('%x %X %Z')} ]{Style.RESET_ALL}"
             f"{Fore.WHITE + Style.BRIGHT} | {Style.RESET_ALL}"
-            f"{Fore.RED + Style.BRIGHT}[ EXIT ] Naoris Protocol Node - BOT{Style.RESET_ALL}"
+            f"{Fore.RED + Style.BRIGHT}[ EXIT ] Naoris Protocol Node - BOT{Style.RESET_ALL}                                       "                              
         )
